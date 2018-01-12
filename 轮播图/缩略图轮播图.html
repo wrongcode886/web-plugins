@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>缩略图的轮播图</title>
+	<style>
+.indexCon{width:782px;overflow:hidden;}
+.indexCon .flashBanner{width:782px;height:326px;overflow:hidden;margin-bottom:12px;}
+.flashBanner{position:relative;}
+.flashBanner .mask{height:32px;line-height:32px;background-color:#000;width:100%;text-align:right;
+	position:absolute;left:0;bottom:-32px;filter:alpha(opacity=70);-moz-opacity:0.7;opacity:0.7;overflow:hidden;}
+.flashBanner .mask img{vertical-align:middle;margin-right:10px;cursor:pointer;}
+.flashBanner .mask img.show{margin-bottom:3px;}
+img{border:0 none;}
+	</style>
+</head>
+<body>
+	<div class="indexCon fl">
+    <div class="flashBanner">
+    	<a href=""><img class="bigImg" width="782" height="326" /></a>
+        <div class="mask">
+        <img src="https://static.bootcss.com/www/assets/img/nodejs.png?1513775350233" uri="https://static.bootcss.com/www/assets/img/nodejs.png?1513775350233" link="javascript:;"  width="60" height="22"/>
+        <img src="https://static.bootcss.com/www/assets/img/yarn.png?1513775350233" uri="https://static.bootcss.com/www/assets/img/yarn.png?1513775350233" link="javascript:;"  width="60" height="22"/>
+        <img src="https://static.bootcss.com/www/assets/img/progit.png?1513775350233" uri="https://static.bootcss.com/www/assets/img/progit.png?1513775350233" link="javascript:;"  width="60" height="22"/>
+        <img src="https://static.bootcss.com/www/assets/img/react.png?1513775350233" uri="https://static.bootcss.com/www/assets/img/react.png?1513775350233" link="javascript:;"  width="60" height="22"/>
+        <img src="https://static.bootcss.com/www/assets/img/webpack.png?1513775350233" uri="https://static.bootcss.com/www/assets/img/webpack.png?1513775350233" link="javascript:;"  width="60" height="22"/>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+	$(function(){
+	$(".flashBanner").each(function(){
+		var timer;
+		$(".flashBanner .mask img").click(function(){
+			var index = $(".flashBanner .mask img").index($(this));	
+			changeImg(index);
+		}).eq(0).click();
+		$(this).find(".mask").animate({
+			"bottom":"0"	
+		},700);
+		$(".flashBanner").hover(function(){
+			clearInterval(timer);	
+		},function(){
+			timer = setInterval(function(){
+				var show = $(".flashBanner .mask img.show").index();
+				if (show >= $(".flashBanner .mask img").length-1)
+					show = 0;
+				else
+					show ++;
+				changeImg(show);
+			},3000);
+		});
+		function changeImg (index)
+		{
+			$(".flashBanner .mask img").removeClass("show").eq(index).addClass("show");
+			$(".flashBanner .bigImg").parents("a").attr("href",$(".flashBanner .mask img").eq(index).attr("link"));
+			$(".flashBanner .bigImg").hide().attr("src",$(".flashBanner .mask img").eq(index).attr("uri")).fadeIn("slow");
+		}
+		timer = setInterval(function(){
+			var show = $(".flashBanner .mask img.show").index();
+			if (show >= $(".flashBanner .mask img").length-1)
+				show = 0;
+			else
+				show ++;
+			changeImg(show);
+		},3000);
+	});
+});
+</script>
+</body>
+</html>
