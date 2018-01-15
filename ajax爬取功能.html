@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+
+<div class="container"></div>
+
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script>
+	$(function(){
+		$.ajax({
+			url:'http://www.linqing07.com/lancer_js/catalog/index.html',
+			// dataType:'html',
+			type: "GET",
+            // dataType: 'JSONP',
+			success:function(e){
+				 
+				var a= $(e);
+				a.find('.catalog').find('a').each(function(index,obj){
+					
+					// if(index<5){
+								var c = $(obj).attr('href');
+
+							c = c.replace('..','http://www.linqing07.com/lancer_js');	
+
+							$.ajax({
+								url:c,
+								success:function(res){
+									var d=$(res);
+									$('.container').append(d.find('.content'));
+								}	
+
+
+							});
+					// }
+					
+
+
+				});
+			}
+		});
+	});
+
+// console.log(a.find('.content'));
+
+				//$('.container').html(a.find('.content'));
+
+
+
+
+
+</script>	
+</body>
+</html>

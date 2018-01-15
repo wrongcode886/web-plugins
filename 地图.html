@@ -1,0 +1,221 @@
+﻿<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>百度地图搜索信息分栏-jq22.com</title>
+<script src="http://libs.baidu.com/jquery/2.1.1/jquery.min.js"></script>
+<style>
+body,html,#allmap {
+	width:100%;
+	height:100%;
+	margin:0;
+	font-family:"微软雅黑";
+	font-size:14px;
+}
+#l-map {
+	height:500px;
+	width:100%;
+}
+#r-result {
+	width:100%;
+}
+#leftBar {
+	width:200px;
+	height:400px;
+	float:left;
+	/* background-color:yellow;
+	*/
+}
+#rightPage {
+	position:relative;
+	margin-left:200px;
+	height:600px;
+}
+/* .btn_toggleLeft {
+	position:absolute;
+	top:0;
+	bottom:0;
+	width:20px;
+	height:80px;
+	left:0;
+	margin:auto;
+	background-color:white;
+	cursor:pointer;
+}
+*/
+        
+        .rightPage select {
+	border:1px #993300 solid;
+	background:#FFFFFF;
+}
+.content {
+	background-color:lightskyblue;
+	height:100%;
+}
+</style>
+</head>
+<body>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&amp;ak=oberB8G1V9dOnbyWGHx5AyLbqGsfMtu3"></script><script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&amp;ak=oberB8G1V9dOnbyWGHx5AyLbqGsfMtu3&amp;services=&amp;t=20180102152545"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js"></script>
+<link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css">
+
+
+    <!-- <div style="width:730px;margin:auto;"> -->
+    <div>
+        <div id="leftBar" class="leftBar"></div>
+        <div id="rightPage" class="rightPage">
+            <!-- <div class="btn_toggleLeft" onclick="test()"> 你点我啊
+            </div> -->
+            所在城市
+            <strong id="curCity"></strong>
+
+            <input id="text_" type="text" value="">
+            <input type="button" value="查询" onclick="searchByStationName();">
+
+            <div id="container" class="content" style="position: absolute;
+                margin-top:30px; 
+                width: 1000px; 
+                height: 590px; 
+                top: 50; 
+                border: 1px solid gray;
+                overflow:hidden;">
+
+
+            </div>
+        </div>
+        <!-- <div id="r-result"></div> -->
+    </div>
+
+<script>
+function setheight() {
+    var div = document.getElementById("leftBar");
+    //div.style.width="40%"; 
+    //div.style.height=40; 
+    div.style.overflow = "auto";
+}
+window.onload = setheight;
+
+var map = new BMap.Map("container");
+var point = new BMap.Point(116.404, 39.915);
+map.centerAndZoom(point, 12);
+
+var myCity = new BMap.LocalCity();
+myCity.get(function(result) {
+    //alert("result:"+ JSON.stringify(result.name));
+    if (!result.name || result.name === undefined || result.name == "全国") {
+        alert("系统无法识别您当前的位置，请您选择您的城市");
+        var point = new BMap.Point(103.2319, 35.3349);
+        map.centerAndZoom(point, 5);
+        //             $("#autoCity").empty();
+        //             $("#autoCity").append("系统无法识别您当前的位置，请您选择您的城市");
+        //             $('#reg_tips').show(500).css('z-index', 10000);
+    } else {
+        //alert("result:"+ JSON.stringify(result));
+        var cityName = result.name;
+        map.setCenter(cityName);
+        //alert("当前定位城市:"+cityName);
+        $("#curCity").empty();
+        $("#curCity").append(cityName);
+    }
+
+});
+
+
+
+
+map.enableScrollWheelZoom(); //启用滚轮放大缩小，默认禁用
+map.enableContinuousZoom(); //启用地图惯性拖拽，默认禁用
+
+map.addControl(new BMap.NavigationControl()); //添加默认缩放平移控件
+map.addControl(new BMap.OverviewMapControl()); //添加默认缩略地图控件
+map.addControl(new BMap.OverviewMapControl({
+    isOpen: true,
+    anchor: BMAP_ANCHOR_BOTTOM_RIGHT
+})); //右下角，打开
+
+function searchByStationName() {
+    map.clearOverlays(); //清空原来的标注
+    var keyword = document.getElementById("text_").value;
+
+    var options = {
+        onSearchComplete: function(results) {
+            // 判断状态是否正确
+            if (localSearch.getStatus() == BMAP_STATUS_SUCCESS) {
+                var s = [];
+                for (var i = 0; i < results.getCurrentNumPois(); i++) {
+                    var poi = results.getPoi(i);
+                    map.centerAndZoom(poi.point, 15);
+                    var marker = new BMap.Marker(new BMap.Point(poi.point.lng, poi.point.lat)); // 创建标注，为要查询的地方对应的经纬度
+                    var content =
+                        "<h3 style='text-align: center'>" + poi.title + "</h3>" +
+                        "<p><b>地址</b>：" + poi.address + "</p>" +
+                        "<p><b>电话</b>：...</p>" +
+                        "<p><b>营业时间</b>：...</p>" +
+                        "<p><b>服务项目</b>：...</p>" +
+                        "<p><div align='center'><button type='button' onClick='clickToBook(" + poi.point.lng + "," + poi.point.lat + ")'>线上预约</button></div></p>" +
+                        "</div>";
+                    map.addOverlay(marker);
+                    addClickHandler(content, marker);
+
+                    s.push("<a href='javascript:void(0)' onclick='openInfoWin(" + JSON.stringify(poi) + "," + JSON.stringify(poi.point) + ")'><b>" + poi.title + "</b>,<br/>" + poi.address + "</a>");
+                }
+                document.getElementById("leftBar").innerHTML = "<h3><b>搜索结果：</b></h3>" + s.join("<br/><br/>");
+            }
+        }
+    };
+
+    var localSearch = new BMap.LocalSearch(map, options);
+    localSearch.enableAutoViewport(); //允许自动调节窗体大小
+    //localSearch.search(keyword);
+    localSearch.searchInBounds(keyword, map.getBounds());
+}
+
+
+function addClickHandler(content, marker) {
+    marker.addEventListener("click", function(e) {
+        openInfo(content, e)
+    });
+}
+
+function openInfo(content, e) {
+    var p = e.target;
+    var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+    var infoWindow = new BMap.InfoWindow(content, opts); // 创建信息窗口对象 
+    map.openInfoWindow(infoWindow, point); //开启信息窗口
+}
+
+
+function openInfoWin(poi, point) {
+    //alert("poi="+poi.title);
+    var content =
+        "<h3 style='text-align: center'>" + poi.title + "</h3>" +
+        "<p><b>地址</b>：" + poi.address + "</p>" +
+        "<p><b>电话</b>：...</p>" +
+        "<p><div align='center'><button type='button' onClick='clickToBook(" + point.lat + "," + point.lng + ")'>显示经纬度</button></div></p>" +
+        "</div>";
+    var searchInfoWindow = new BMapLib.SearchInfoWindow(map, content, {
+        //title: "信息框3", //标题
+        width: 300, //宽度
+        height: 220, //高度
+        panel: "panel", //检索结果面板
+        enableAutoPan: true, //自动平移
+        searchTypes: []
+    });
+
+    searchInfoWindow.open(new BMap.Point(point.lng, point.lat));
+}
+
+function clickToBook(lat, lng) {
+    alert("纬度：" + lat + ",经度：" + lng);
+}
+
+var opts = {
+    width: 300, // 信息窗口宽度
+    height: 220, // 信息窗口高度
+    //title : "信息窗口" , // 信息窗口标题
+    enableMessage: true //设置允许信息窗发送短息
+};
+</script>
+
+</body>
+</html>
